@@ -1,0 +1,68 @@
+name: Test_copy_files_to_diff_repo
+# Controls when the action will run
+
+on:
+  
+  workflow_dispatch:
+  
+jobs:
+  Test-copy-files-job:
+    ##runs-on: [self-hosted, atmos-aws-shared-gh-runner]
+    runs-on: [atmos-aws-arc-runner-set]
+    steps:
+      - uses: Sanofi-InnerSource/github-actions-library/setup-root-ca@main
+      - run: sudo apt-get update
+      - run: sudo apt-get install sudo
+      - run: sudo apt-get install -y ca-certificates curl zip
+      
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Trigger the repository dispatch for storage integration 
+        run: |
+
+         echo "Step:1 Clone repo A and remove its upstream"
+         mkdir test_working_dir
+         cd test_working_dir
+         git clone https://github.com/Sanofi-GitHub/digitaldata-snowflake-selfservice.git
+         
+         cd digitaldata-snowflake-selfservice
+
+         git remote -v
+         git remote rm origin
+         git remote -v
+
+         echo "Step:2 Dissect the target portion:"
+         git filter-branch --subdirectory-filter py -- --all
+         
+         echo "ls -ltr:"
+         ls -ltr
+
+         echo "git reset:"
+         git reset --hard
+         git gc --aggressive 
+         git prune
+         git clean -fd
+
+         echo "Step:3 Move dissected portion into a new directory"
+         mkdir -p Project1
+         for f in *.py; do
+          git mv $f Project1
+         done
+
+         ##git commit -m "Transfer the dissected content into the new directory"
+
+         cd ..
+
+         echo "Step:4 Clone repo B and create for it a remote to repo A"
+         git clone https://github.com/Sanofi-GitHub/airflow-digital-provisioning.git
+         cd airflow-digital-provisioning
+         git remote add remote_to_A ../digitaldata-snowflake-selfservice
+         git remote -v
+
+         git pull remote_to_A main --allow-unrelated-histories
+
+         git remote rm remote_to_A
+         git push
+
+      

@@ -1,0 +1,126 @@
+name: Storage_Integration_Provisioning
+# Controls when the action will run
+
+on:
+  
+  workflow_dispatch:
+  #   inputs:
+  #     account:
+  #       description: 'Account Name'
+  #       required: true
+  #       type: string
+  #       default: 'Example: EMEA_RND'
+  #     database:
+  #       description: 'Database Name'
+  #       required: true
+  #       type: string
+  #       default: 'Example: INSPIRE_DEV'
+  #     integration_name:
+  #       description: 'IntegrationName'
+  #       required: true
+  #       type: string
+  #       default: 'Example: <Database_Name>_S3_INT'
+  #     AWS_ROLE_ARN:
+  #       description: 'AWS_ROLE_ARN'
+  #       required: true
+  #       type: string
+  #       default: 'Example: arn:aws:iam::.....'
+  #     ALLOWED_LOCATIONS:
+  #       description: 'ALLOWED_LOCATIONS'
+  #       required: true
+  #       type: string
+  #       default: '(''s3://bucket1/'',''s3://bucket2/'')'
+
+jobs:
+  deploy-snowflake-changes-job:
+    environment:
+      name: assignee
+    ##runs-on: [self-hosted, atmos-aws-shared-gh-runner]
+    runs-on: [atmos-aws-arc-runner-set]
+    env:
+      REPO_DISPATCH_PAT: ${{ secrets.REPO_DISPATCH_PATOKEN }}
+      INPUT_ACCOUNT: ${{ inputs.account }}
+      INPUT_DATABASE: ${{ inputs.database }}
+      INPUT_INTEGRATION: ${{ inputs.integration_name }}
+      INPUT_AWS_ROLE_ARN: ${{ inputs.AWS_ROLE_ARN }}
+      INPUT_ALLOWED_LOCATIONS: ${{ inputs.ALLOWED_LOCATIONS }}
+      INPUT_ROLE_NAME: ${{ inputs.database }}_SYSADMIN
+    steps:
+      - uses: Sanofi-InnerSource/github-actions-library/setup-root-ca@main
+      - run: sudo apt-get update
+      - run: sudo apt-get install sudo
+      - run: sudo apt-get install -y ca-certificates curl zip
+      
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+           cd "$GITHUB_WORKSPACE/Deployment-Scripts/"
+           python -m pip install --upgrade pip
+           pip install -r requirements.txt
+          
+      - name: Trigger the repository dispatch for storage integration 
+        run: |
+         cd "$GITHUB_WORKSPACE/Deployment-Scripts/"
+         export OWNER='Sanofi-GitHub'
+         export REPO='snowflake-platform'
+         export WORKFLOW2_NAME='si_repo_dispatch'
+
+         echo "Input Variable : INPUT_ACCOUNT: " $INPUT_ACCOUNT
+         echo "Input Variable : INPUT_DATABASE: " $INPUT_DATABASE
+         echo "Input Variable : INPUT_INTEGRATION: " $INPUT_INTEGRATION
+         echo "Input Variable : INPUT_AWS_ROLE_ARN: " $INPUT_AWS_ROLE_ARN
+         echo "Input Variable : INPUT_ALLOWED_LOCATIONS: " $INPUT_ALLOWED_LOCATIONS
+         echo "Input Variable : INPUT_ROLE_NAME: " $INPUT_ROLE_NAME
+         echo "Input Variable : REPO_DISPATCH_PAT: " $REPO_DISPATCH_PAT
+         echo "Other Variable : OWNER: " $OWNER
+         echo "Other Variable : REPO: " $REPO
+         echo "Other Variable : WORKFLOW2_NAME: " $WORKFLOW2_NAME
+
+         python $GITHUB_WORKSPACE/Deployment-Scripts/workflow_trigger_wfd.py $REPO_DISPATCH_PAT $OWNER $REPO $WORKFLOW2_NAME $INPUT_ACCOUNT $INPUT_DATABASE $INPUT_INTEGRATION $INPUT_AWS_ROLE_ARN $INPUT_ALLOWED_LOCATIONS
+
+
+      # - name: Run storage integration repository dispatch
+      #   env:
+      #     SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}
+      #     SF_USERNAME: ${{ secrets.SF_USERNAME }}
+      #     SF_ROLE: ${{ secrets.SF_ROLE }}
+      #     SF_WAREHOUSE: ${{ secrets.SF_WAREHOUSE }}
+      #     SF_DATABASE: ${{ secrets.SF_DATABASE }}
+      #     REPO_DISPATCH_PAT: ${{ secrets.REPO_DISPATCH_PATOKEN }}
+      #     SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
+      #     INPUT_ACCOUNT: ${{ inputs.account }}
+      #     INPUT_DATABASE: ${{ inputs.database }}
+      #     INPUT_INTEGRATION: ${{ inputs.integration_name }}
+      #     INPUT_AWS_ROLE_ARN: ${{ inputs.AWS_ROLE_ARN }}
+      #     INPUT_ALLOWED_LOCATIONS: ${{ inputs.ALLOWED_LOCATIONS }}
+      #     INPUT_ROLE_NAME: ${{ inputs.database }}_SYSADMIN
+      #     PS115095: ${{ secrets.PS115095 }}
+      #     PS115095_PWD: ${{ secrets.PS115095_PWD }}
+      #   run: |
+      #     echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+      #     #python --version
+          
+      #     echo "Input Variable : INPUT_ACCOUNT: " $INPUT_ACCOUNT
+      #     echo "Input Variable : INPUT_DATABASE: " $INPUT_DATABASE
+      #     echo "Input Variable : INPUT_INTEGRATION: " $INPUT_INTEGRATION
+      #     echo "Input Variable : INPUT_AWS_ROLE_ARN: " $INPUT_AWS_ROLE_ARN
+      #     echo "Input Variable : INPUT_ALLOWED_LOCATIONS: " $INPUT_ALLOWED_LOCATIONS
+      #     echo "Input Variable : INPUT_ROLE_NAME: " $INPUT_ROLE_NAME
+      #     echo "Input Variable : REPO_DISPATCH_PAT: " $REPO_DISPATCH_PAT
+
+      #     ##curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: application/json" -H "Authorization: Bearer $REPO_DISPATCH_PAT " "https://api.github.com/repos/Sanofi-GitHub/snowflake-platform/dispatches" -d "{ \"event_type\": \"si_repo_dispatch\", \"client_payload\": \"{ \\\"inputs_account\\\": \\\"$INPUT_ACCOUNT\\\",\\\"inputs_database\\\": \\\"$INPUT_DATABASE\\\",\\\"inputs_integration_name\\\": \\\"$INPUT_INTEGRATION\\\",\\\"inputs_AWS_ROLE_ARN\\\": \\\"$INPUT_AWS_ROLE_ARN\\\",\\\"inputs_ALLOWED_LOCATIONS\\\": \\\"$INPUT_ALLOWED_LOCATIONS\\\"} \" }"
+          
+      #     # curl -X POST -H "Accept: application/vnd.github+json" \
+      #     # -H "Content-Type: application/json" \
+      #     # -H "Authorization: Bearer $REPO_DISPATCH_PAT " \
+      #     # https://api.github.com/repos/Sanofi-GitHub/snowflake-platform/dispatches \
+      #     # -d '{ "event_type": "si_repo_dispatch" , \
+      #     # "client_payload": { "inputs_account": "EMEA_SAND","inputs_database": "AUTODBPROVISIONING_DEV","inputs_integration_name": "AUTODBPROVISIONING_DEV_S3_INT","inputs_AWS_ROLE_ARN": "arn:aws:iam::053678664297:role/App_Project_segmentio_snowflake_role", "inputs_ALLOWED_LOCATIONS": "('s3://sanofi-emea-segmentio-dev/')" } }'
+           

@@ -1,0 +1,58 @@
+name: Create Storage Integration
+description: "This issue triggers a workflow that creates storage integration."
+title: "Create Storage Integration <-- DO NOT Change this title"
+labels: ["create-storage-integration"]
+assignees: 
+  - AbhishekRathod-Sanofi
+  - guillaumepiat
+  - s2Chris
+  - LakshmiYaganti
+body:
+- type: input
+  id: account
+  attributes:
+    label: "Account Name"
+    description: "Provide the existing account name where storage integration needs to be created. (WITHOUT ''SANOFI-'' PREFIX)"
+    placeholder: "Example: EMEA_RND (*** WITHOUT ''SANOFI-'' PREFIX)"
+  validations:
+      required: true
+- type: input
+  id: database
+  attributes:
+    label: "Database Name"
+    description: "Provide the existing Database Name."
+    placeholder: "Example: PROJECT_DEV"
+  validations:
+      required: true
+- type: input
+  id: integration_name
+  attributes:
+    label: "Integration Name"
+    description: "Provide the Integration Name."
+    placeholder: "Example: <Database_Name>_S3_INT"
+  validations:
+      required: true
+- type: input
+  id: AWS_ROLE_ARN
+  attributes:
+    label: "AWS ROLE ARN"
+    description: "Provide the existing AWS ROLE ARN."
+    placeholder: "Example: arn:aws:iam::....."
+  validations:
+      required: true
+- type: input
+  id: ALLOWED_LOCATIONS
+  attributes:
+    label: "Allowed Locations"
+    description: "Provide the existing storage bucket details."
+    placeholder: "('s3://bucket1/','s3://bucket2/')"
+  validations:
+      required: true
+- type: input
+  id: email
+  attributes:
+    label: "Email"
+    description: "Provide the email, storage integration details will be shared on the given email."
+    placeholder: "<...>@sanofi.com"
+  validations:
+      required: true

@@ -1,0 +1,64 @@
+name: Test_Dynamic_Approval
+# Controls when the action will run
+
+on:
+  workflow_dispatch:
+    inputs:
+      group:
+        description: 'Select Group Name'
+        required: true
+        type: choice
+        options:
+          - CHC
+          - Commercial
+          - 'Corporate Functions'
+          - M&S
+          - RWD
+  
+jobs:
+  chc-approval:
+    ##runs-on: [self-hosted, atmos-aws-shared-gh-runner]
+    runs-on: [atmos-aws-arc-runner-set]
+    if: inputs.group == 'CHC'
+    environment:
+      name: CHC_Approval
+    steps:
+      - id: chc
+        run: echo "Evaluating CHC Approval"
+  
+  commercial-approval:
+    ##runs-on: [self-hosted, atmos-aws-shared-gh-runner]
+    runs-on: [atmos-aws-arc-runner-set]
+    if: inputs.group == 'Commercial'
+    environment:
+      name: Commercial_Approval
+    steps:
+      - id: commercial
+        run: echo "Evaluating Commercial Approval"
+     
+  
+  verify-approval-job:
+    ##runs-on: [self-hosted, atmos-aws-shared-gh-runner]
+    runs-on: [atmos-aws-arc-runner-set]
+    needs: [chc-approval, commercial-approval]
+    if:  always() 
+    ####&& (needs.*.result == 'success' || needs.*.result == 'skipped')
+    steps:
+      - name: Testing Dynamic exection
+        run: |
+          echo "needs.chc.result =" {{ needs.chc.result }}
+          echo "needs.commercial.result =" {{ needs.commercial.result }}
+  
+  # input-processing-job:
+  ##   runs-on: [self-hosted, atmos-aws-shared-gh-runner]
+  #   runs-on: [atmos-aws-arc-runner-set]
+  #   # outputs:
+  #   #   output1: ${{ steps.step1.outputs.test }}
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+
+  #     - name: Testing Dynamic exection
+  #       # id: step1
+  #       run: |
+  #         echo "Testing Dynamic approval ... " 

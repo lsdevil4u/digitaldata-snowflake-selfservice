@@ -1,0 +1,96 @@
+name: Custom User Role Warehouse Provisioning
+description: "This issue triggers a workflow that will create Custom User / Role / Warehouse based on input."
+title: "Custom User Role Warehouse Provisioning <-- DO NOT Change this title"
+labels: ["custom_user_role_warehouse_issue_template"]
+assignees: 
+  - AbhishekRathod-Sanofi
+  - guillaumepiat
+  - s2Chris
+  - LakshmiYaganti
+body:
+- type: input
+  id: account
+  attributes:
+    label: "Account Name"
+    description: "Provide the existing account name. (WITHOUT ''SANOFI-'' PREFIX)"
+    placeholder: "Example: EMEA_RND (*** WITHOUT ''SANOFI-'' PREFIX)"
+  validations:
+      required: true
+- type: input
+  id: database
+  attributes:
+    label: "Database Name"
+    description: "Provide the existing Database Name."
+    placeholder: "Example: PROJECT_DEV"
+  validations:
+      required: true
+- type: input
+  id: role
+  attributes:
+    label: "Role Name"
+    description: "Provide the Role Name."
+    placeholder: "Example: <DBNAME>_<APP_NAME>_PROC"
+  validations:
+      required: true
+- type: dropdown
+  id: If_ADGroup_creation_required
+  attributes:
+    label: "Is AD group (associated with Role) creation required?"
+    description: "Specify if AD group (associated with Role) creation required."
+    options:
+        - 'Yes'
+        - 'No'
+  validations:
+      required: false
+- type: input
+  id: OWNER
+  attributes:
+    label: "Owner (If AD group associated to Role is required)"
+    description: "Provide the emailid for the Owner of the AD group associated."
+    placeholder: "owner@sanofi.com"
+  validations:
+      required: false
+- type: dropdown
+  id: If_Warehouse_creation_required
+  attributes:
+    label: "Is Warehouse creation required?"
+    description: "Specify if Warehouse creation required."
+    options:
+        - 'Yes'
+        - 'No'
+  validations:
+      required: false
+- type: input
+  id: Warehouse
+  attributes:
+    label: "Warehouse Name"
+    description: "Provide the Warehouse Name."
+    placeholder: "<DBNAME>_WH_<APP_NAME>"
+  validations:
+      required: false
+- type: dropdown
+  id: If_User_creation_required
+  attributes:
+    label: "Is User creation required?"
+    description: "Specify if User creation required."
+    options:
+        - 'Yes'
+        - 'No'
+  validations:
+      required: false
+- type: input
+  id: user
+  attributes:
+    label: "User Name"
+    description: "Provide the User Name."
+    placeholder: "<DBNAME>_<APP_NAME>"
+  validations:
+      required: false
+- type: input
+  id: email
+  attributes:
+    label: "Email"
+    description: "Provide the email, provisioning details will be shared on the given email."
+    placeholder: "<...>@sanofi.com"
+  validations:
+      required: true

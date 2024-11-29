@@ -1,0 +1,59 @@
+name: Snowflake DB Provisioning
+description: "This workflow requests approval from the Data Architect (DA) first and then triggers a workflow that will create Snowflake DB." 
+title: "DB Provisioning <-- DO NOT Change this title"
+labels: ["db_provisioning_issue_template"]
+assignees: 
+  - HaYsSeNc
+  - longprem69
+  - sukusanofi
+  - kamalnanduri
+  - nm57433
+  - BapediBoupi
+  - bogdanudovicicsanofi
+  - bosesaby
+  - nileshinha-sanofi
+  - AbhishekRathod-Sanofi
+  - guillaumepiat
+  - s2Chris
+  - LakshmiYaganti
+body:
+- type: input
+  id: account
+  attributes:
+    label: "Account Name"
+    description: "Provide the account name. (WITHOUT ''SANOFI-'' PREFIX)"
+    placeholder: "Example: EMEA_RND (*** WITHOUT ''SANOFI-'' PREFIX)"
+  validations:
+      required: true
+- type: input
+  id: database
+  attributes:
+    label: "Database Name"
+    description: "Provide the Database Name."
+    placeholder: "Example: PROJECT_DEV"
+  validations:
+      required: true
+- type: input
+  id: OWNER
+  attributes:
+    label: "Owner"
+    description: "Provide the emailid for the Owner of the database."
+    placeholder: "owner@sanofi.com"
+  validations:
+      required: true
+- type: input
+  id: MYAPPSID
+  attributes:
+    label: "MYAPPSID"
+    description: "Provide the MYAPPSID"
+    placeholder: "MYAPPSID"
+  validations:
+      required: true
+- type: input
+  id: ONEMESH_DATA_ASSET_NAME
+  attributes:
+    label: "DATA_ASSET_NAME"
+    description: "Provide the Data Asset Name"
+    placeholder: "<DATA_ASSET_NAME>"
+  validations:
+      required: true      

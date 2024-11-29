@@ -1,0 +1,76 @@
+name: Data Share Creation ( Restricted to run only from OneMesh Marketplace Integration )
+description: "This issue triggers a workflow that will create Data Share based on input."
+title: "Data Share Creation <-- DO NOT Change this title"
+labels: ["data_share_creation_issue_template"]
+assignees: 
+  - AbhishekRathod-Sanofi
+  - guillaumepiat
+  - s2Chris
+  - LakshmiYaganti
+body:
+- type: input
+  id: project
+  attributes:
+    label: "Project Name"
+    description: "Mention the Project name."
+    placeholder: "Example: Project_Name"
+  validations:
+      required: true
+- type: input
+  id: provideraccount
+  attributes:
+    label: "Provider Account Name"
+    description: "Mention the existing Provider Account Name."
+    placeholder: "Example: EMEA_RND"
+    ##placeholder: "Example: FL09027"
+  validations:
+      required: true      
+- type: input
+  id: providerdb
+  attributes:
+    label: "Provider Database Name"
+    description: "Mention the existing Provider Database Name."
+    placeholder: "Example: Providev_DB_DEV"
+  validations:
+      required: true
+- type: input
+  id: providerschema
+  attributes:
+    label: "Provider Schema Name"
+    description: "Mention the existing Provider Schema Name."
+    placeholder: "Example: Providev_Schema"
+  validations:
+      required: true
+- type: input
+  id: providerobject
+  attributes:
+    label: "Provider Object Name"
+    description: "Mention the existing Provider Object Name."
+    placeholder: "Example: comma separated Object_Name without space or % (for all objects in given schema)"
+  validations:
+      required: true
+- type: input
+  id: consumeraccount
+  attributes:
+    label: "Consumer Account Name"
+    description: "Provide the existing Consumer Account Name."
+    placeholder: "Example: EMEA_SAND"
+    #placeholder: "Example: ZA90120"
+  validations:
+      required: true      
+- type: input
+  id: consumerrole
+  attributes:
+    label: "Consumer Role Name (Note: only one role and make sure consumer role exists in consumer account.)"
+    description: "Mention the existing Consumer Role Name."
+    placeholder: "Example: Consumer_Role"
+  validations:
+      required: true                    
+# - type: input
+#   id: email
+#   attributes:
+#     label: "Email"
+#     description: "Provide the email, updates will be shared on the given email."
+#     placeholder: "<...>@sanofi.com"
+#   validations:
+#       required: true

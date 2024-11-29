@@ -1,0 +1,98 @@
+name: Custom_User_Role_Warehouse_Provisioning_Issue_Template
+# Controls when the action will run
+
+on:
+  workflow_dispatch:
+    inputs:
+      account:
+        description: 'Account Name'
+        required: true
+        type: string
+        default: 'Account_Name'
+      database:
+        description: 'Database Name'
+        required: true
+        type: string
+        default: 'DB_Name'
+      role:
+        description: 'Role Name'
+        required: true
+        type: string
+        default: '<DBNAME>_<APP_NAME>'
+      If_ADGroup_creation_required:
+        description: 'Is AD group (associated with Role) creation required?'
+        required: false
+        type: boolean
+      OWNER:
+        description: 'Owner (If AD group associated to Role is required)'
+        required: false
+        type: string
+        default: 'owner@sanofi.com'
+      If_Warehouse_creation_required:
+        description: 'Is Warehouse creation required?'
+        required: false
+        type: boolean
+      Warehouse:
+        description: 'Warehouse Name'
+        required: false
+        type: string
+        default: '<DBNAME>_WH_<APP_NAME>'
+      If_User_creation_required:
+        description: 'Is User creation required?'
+        required: false
+        type: boolean
+      user:
+        description: 'User Name'
+        required: false
+        type: string
+        default: 'User_Name'
+      email:
+          description: 'Email'
+          required: false
+          type: string
+          default: 'email'
+  
+jobs:
+  deploy-snowflake-changes-job:
+    #environment:
+    #  name: assignee
+    ##runs-on: [self-hosted, atmos-aws-shared-gh-runner]
+    runs-on: [atmos-aws-arc-runner-set]
+    env:
+      REPO_DISPATCH_PAT: ${{ secrets.REPO_DISPATCH_PATOKEN }}
+      INPUT_ACCOUNT: ${{ inputs.account }}
+      INPUT_DATABASE: ${{ inputs.database }}
+      INPUT_ROLE: ${{ inputs.role }}
+      INPUT_OWNER: ${{ inputs.OWNER }}
+      INPUT_WAREHOUSE: ${{ inputs.Warehouse }}
+      INPUT_USER: ${{ inputs.user }}
+      INPUT_IF_ADGROUP_CREATION_REQUIRED: ${{ inputs.If_ADGroup_creation_required }} 
+      INPUT_IF_WAREHOUSE_CREATION_REQUIRED: ${{ inputs.If_Warehouse_creation_required }} 
+      INPUT_IF_USER_CREATION_REQUIRED: ${{ inputs.If_User_creation_required }}   
+      INPUT_EMAIL: ${{ inputs.email }}     
+    steps:
+      - uses: Sanofi-InnerSource/github-actions-library/setup-root-ca@main
+      - run: sudo apt-get update
+      - run: sudo apt-get install sudo
+      - run: sudo apt-get install -y ca-certificates curl zip
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+           cd "$GITHUB_WORKSPACE/Deployment-Scripts/"
+           python -m pip install --upgrade pip
+           pip install -r requirements.txt
+
+      - name: Process issue template inputs
+        run: |
+
+          cd "$GITHUB_WORKSPACE/Deployment-Scripts/"
+          echo "Executing python script: custom_user_role_warehouseJSON_TEST.py ... " 
+          
+          python $GITHUB_WORKSPACE/Deployment-Scripts/custom_user_role_warehouseJSON_TEST.py -v

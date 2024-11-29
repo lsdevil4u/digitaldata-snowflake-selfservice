@@ -1,0 +1,169 @@
+name: Storage_Integration_Provisioning_Issue_Template
+# Controls when the action will run
+
+on:
+  issues:
+    types: [opened, reopened]
+  
+jobs:
+  deploy-snowflake-changes-job:
+    #environment:
+    #  name: assignee
+    ##runs-on: [self-hosted, atmos-aws-shared-gh-runner]
+    runs-on: [atmos-aws-arc-runner-set]
+    if: github.event.issue.title  == 'Create Storage Integration <-- DO NOT Change this title'
+    env:
+      REPO_DISPATCH_PAT: ${{ secrets.REPO_DISPATCH_PATOKEN }}
+      # INPUT_ACCOUNT: ${{ inputs.account }}
+      # INPUT_DATABASE: ${{ inputs.database }}
+      # INPUT_INTEGRATION: ${{ inputs.integration_name }}
+      # INPUT_AWS_ROLE_ARN: ${{ inputs.AWS_ROLE_ARN }}
+      # INPUT_ALLOWED_LOCATIONS: ${{ inputs.ALLOWED_LOCATIONS }}
+      # INPUT_ROLE_NAME: ${{ inputs.database }}_SYSADMIN
+      # HTTP_PROXY: 'emea-aws-webproxy.service.cloud.local:3128'
+      # HTTPS_PROXY: 'emea-aws-webproxy.service.cloud.local:3128'
+      # NO_PROXY: 'emea-aws-gitlab.sanofi.com,cloud.local,sanofi.com,docker'
+      # #TF_VAR_ADMINKEY: ${{ secrets.TF_VAR_ADMINKEY}}
+      ENROLLMENT_EVENT: ${{ github.event_name }}
+      ENROLLMENT_TITLE: ${{ github.event.issue.title }}
+      ENROLLMENT_NUMBER: ${{ github.event.issue.number }}
+      ENROLLMENT_MESSAGE: ${{ github.event.issue.body }}
+      ISSUE_REPO_URL: ${{ github.event.issue.repository_url }}
+      REPO_NAME: ${{ github.event.repository.full_name }}
+      REPO_URL: ${{ github.event.repository.url }}
+      #AWS_WEB_IDENTITY_TOKEN_FILE: ${{ secrets.SHARED_GHRUNNER_AWS_WEB_IDENTITY_TOKEN_FILE }}
+      #AWS_ROLE_ARN: ${{ secrets.SHARED_GHRUNNER_AWS_ROLE_ARN }}
+    steps:
+      - uses: Sanofi-InnerSource/github-actions-library/setup-root-ca@main
+      - run: sudo apt-get update
+      - run: sudo apt-get install sudo
+      - run: sudo apt-get install -y ca-certificates curl zip
+      
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+           cd "$GITHUB_WORKSPACE/Deployment-Scripts/"
+           python -m pip install --upgrade pip
+           pip install -r requirements.txt
+
+      - name: Process issue template inputs
+        run: |
+          echo 'github.event_name: ${{ github.event_name }}'
+          echo 'github.head_ref: ${{ github.head_ref }}'
+          echo 'github.event.issue.title: ${{ github.event.issue.title }}'
+          echo 'github.event.issue.number: ${{ github.event.issue.number }}'
+          echo 'github.event.issue.body: ${{ github.event.issue.body }}'
+          echo 'github.event.issue.repository_url: ${{ github.event.issue.repository_url }}'
+          echo 'github.event.repository.full_name: ${{ github.event.repository.full_name }}'
+          echo 'github.event.repository.url: ${{ github.event.repository.url }}'
+         
+          # following echo not working so commented
+          # echo 'github.event.issue.body.account: ${{ github.event.issue.body.account }}'
+          # echo 'github.event.issue.body.database: ${{ github.event.issue.body.database }}'
+          # echo 'github.event.issue.body.integration_name: ${{ github.event.issue.body.integration_name }}'
+          # echo 'github.event.issue.body.AWS_ROLE_ARN: ${{ github.event.issue.body.AWS_ROLE_ARN }}'
+          # echo 'github.event.issue.body.ALLOWED_LOCATIONS: ${{ github.event.issue.body.ALLOWED_LOCATIONS }}'
+          
+          #echo "Display sh files"
+          #cat /runner/_work/_temp/*.sh
+
+          #echo "Executing issue_template.py: " 
+          #python $GITHUB_WORKSPACE/Deployment-Scripts/issue_template.py -v
+
+          # lines=$ENROLLMENT_MESSAGE
+          # INPUT_ACCOUNT=${lines[2]}
+          # INPUT_DATABASE=${lines[6]}
+          # INPUT_INTEGRATION=${lines[10]}
+          # INPUT_AWS_ROLE_ARN=${lines[14]}
+          # INPUT_ALLOWED_LOCATIONS=${lines[18]}
+          # OWNER='Sanofi-GitHub'
+          # REPO='snowflake-platform'
+          # WORKFLOW2_NAME='si_repo_dispatch'
+
+          # echo "Input Variable : INPUT_ACCOUNT: " $INPUT_ACCOUNT
+          # echo "Input Variable : INPUT_DATABASE: " $INPUT_DATABASE
+          # echo "Input Variable : INPUT_INTEGRATION: " $INPUT_INTEGRATION
+          # echo "Input Variable : INPUT_AWS_ROLE_ARN: " $INPUT_AWS_ROLE_ARN
+          # echo "Input Variable : INPUT_ALLOWED_LOCATIONS: " $INPUT_ALLOWED_LOCATIONS
+          # echo "Input Variable : REPO_DISPATCH_PAT: " $REPO_DISPATCH_PAT
+          # echo "Other Variable : OWNER: " $OWNER
+          # echo "Other Variable : REPO: " $REPO
+          # echo "Other Variable : WORKFLOW2_NAME: " $WORKFLOW2_NAME
+          
+          cd "$GITHUB_WORKSPACE/Deployment-Scripts/"
+          echo "Executing python script storage_integration.py: " 
+          
+          ##python $GITHUB_WORKSPACE/Deployment-Scripts/storage_integration.py $REPO_DISPATCH_PAT $OWNER $REPO $WORKFLOW2_NAME $INPUT_ACCOUNT $INPUT_DATABASE $INPUT_INTEGRATION $INPUT_AWS_ROLE_ARN $INPUT_ALLOWED_LOCATIONS
+          
+          python $GITHUB_WORKSPACE/Deployment-Scripts/storage_integration.py -v
+          
+          
+
+      # - name: Trigger the repository dispatch for storage integration 
+      #   run: |
+      #    cd "$GITHUB_WORKSPACE/Deployment-Scripts/"
+      #    export OWNER='Sanofi-GitHub'
+      #    export REPO='snowflake-platform'
+      #    export WORKFLOW2_NAME='si_repo_dispatch'
+
+      #    echo "Input Variable : INPUT_ACCOUNT: " $INPUT_ACCOUNT
+      #    echo "Input Variable : INPUT_DATABASE: " $INPUT_DATABASE
+      #    echo "Input Variable : INPUT_INTEGRATION: " $INPUT_INTEGRATION
+      #    echo "Input Variable : INPUT_AWS_ROLE_ARN: " $INPUT_AWS_ROLE_ARN
+      #    echo "Input Variable : INPUT_ALLOWED_LOCATIONS: " $INPUT_ALLOWED_LOCATIONS
+      #    echo "Input Variable : INPUT_ROLE_NAME: " $INPUT_ROLE_NAME
+      #    echo "Input Variable : REPO_DISPATCH_PAT: " $REPO_DISPATCH_PAT
+      #    echo "Other Variable : OWNER: " $OWNER
+      #    echo "Other Variable : REPO: " $REPO
+      #    echo "Other Variable : WORKFLOW2_NAME: " $WORKFLOW2_NAME
+
+      #    python $GITHUB_WORKSPACE/Deployment-Scripts/workflow_trigger.py $REPO_DISPATCH_PAT $OWNER $REPO $WORKFLOW2_NAME $INPUT_ACCOUNT $INPUT_DATABASE $INPUT_INTEGRATION $INPUT_AWS_ROLE_ARN $INPUT_ALLOWED_LOCATIONS
+
+      #########################################################################
+      # Following not working so far, need more testing for CURL based call
+      #########################################################################
+      # - name: Run storage integration repository dispatch
+      #   env:
+      #     SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}
+      #     SF_USERNAME: ${{ secrets.SF_USERNAME }}
+      #     SF_ROLE: ${{ secrets.SF_ROLE }}
+      #     SF_WAREHOUSE: ${{ secrets.SF_WAREHOUSE }}
+      #     SF_DATABASE: ${{ secrets.SF_DATABASE }}
+      #     REPO_DISPATCH_PAT: ${{ secrets.REPO_DISPATCH_PATOKEN }}
+      #     SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
+      #     INPUT_ACCOUNT: ${{ inputs.account }}
+      #     INPUT_DATABASE: ${{ inputs.database }}
+      #     INPUT_INTEGRATION: ${{ inputs.integration_name }}
+      #     INPUT_AWS_ROLE_ARN: ${{ inputs.AWS_ROLE_ARN }}
+      #     INPUT_ALLOWED_LOCATIONS: ${{ inputs.ALLOWED_LOCATIONS }}
+      #     INPUT_ROLE_NAME: ${{ inputs.database }}_SYSADMIN
+      #     PS115095: ${{ secrets.PS115095 }}
+      #     PS115095_PWD: ${{ secrets.PS115095_PWD }}
+      #   run: |
+      #     echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+      #     #python --version
+          
+      #     echo "Input Variable : INPUT_ACCOUNT: " $INPUT_ACCOUNT
+      #     echo "Input Variable : INPUT_DATABASE: " $INPUT_DATABASE
+      #     echo "Input Variable : INPUT_INTEGRATION: " $INPUT_INTEGRATION
+      #     echo "Input Variable : INPUT_AWS_ROLE_ARN: " $INPUT_AWS_ROLE_ARN
+      #     echo "Input Variable : INPUT_ALLOWED_LOCATIONS: " $INPUT_ALLOWED_LOCATIONS
+      #     echo "Input Variable : INPUT_ROLE_NAME: " $INPUT_ROLE_NAME
+      #     echo "Input Variable : REPO_DISPATCH_PAT: " $REPO_DISPATCH_PAT
+
+      #     ##curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: application/json" -H "Authorization: Bearer $REPO_DISPATCH_PAT " "https://api.github.com/repos/Sanofi-GitHub/snowflake-platform/dispatches" -d "{ \"event_type\": \"si_repo_dispatch\", \"client_payload\": \"{ \\\"inputs_account\\\": \\\"$INPUT_ACCOUNT\\\",\\\"inputs_database\\\": \\\"$INPUT_DATABASE\\\",\\\"inputs_integration_name\\\": \\\"$INPUT_INTEGRATION\\\",\\\"inputs_AWS_ROLE_ARN\\\": \\\"$INPUT_AWS_ROLE_ARN\\\",\\\"inputs_ALLOWED_LOCATIONS\\\": \\\"$INPUT_ALLOWED_LOCATIONS\\\"} \" }"
+          
+      #     # curl -X POST -H "Accept: application/vnd.github+json" \
+      #     # -H "Content-Type: application/json" \
+      #     # -H "Authorization: Bearer $REPO_DISPATCH_PAT " \
+      #     # https://api.github.com/repos/Sanofi-GitHub/snowflake-platform/dispatches \
+      #     # -d '{ "event_type": "si_repo_dispatch" , \
+      #     # "client_payload": { "inputs_account": "EMEA_SAND","inputs_database": "AUTODBPROVISIONING_DEV","inputs_integration_name": "AUTODBPROVISIONING_DEV_S3_INT","inputs_AWS_ROLE_ARN": "arn:aws:iam::053678664297:role/App_Project_segmentio_snowflake_role", "inputs_ALLOWED_LOCATIONS": "('s3://sanofi-emea-segmentio-dev/')" } }'
+           

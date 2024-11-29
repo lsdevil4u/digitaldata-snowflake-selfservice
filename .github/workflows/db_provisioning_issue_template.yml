@@ -1,0 +1,58 @@
+name: db_provisioning
+# Controls when the action will run
+
+on:
+  issues:
+    types: [opened, reopened]
+  
+jobs:
+  deploy-snowflake-changes-job:
+    environment:
+      name: DA_Approval
+    ##runs-on: [self-hosted, atmos-aws-shared-gh-runner]
+    runs-on: [atmos-aws-arc-runner-set]
+    if: github.event.issue.title  == 'DB Provisioning <-- DO NOT Change this title'
+    env:
+      REPO_DISPATCH_PAT: ${{ secrets.REPO_DISPATCH_PATOKEN }}
+      ENROLLMENT_EVENT: ${{ github.event_name }}
+      ENROLLMENT_TITLE: ${{ github.event.issue.title }}
+      ENROLLMENT_NUMBER: ${{ github.event.issue.number }}
+      ENROLLMENT_MESSAGE: ${{ github.event.issue.body }}
+      ISSUE_REPO_URL: ${{ github.event.issue.repository_url }}
+      REPO_NAME: ${{ github.event.repository.full_name }}
+      REPO_URL: ${{ github.event.repository.url }}
+    steps:
+      - uses: Sanofi-InnerSource/github-actions-library/setup-root-ca@main
+      - run: sudo apt-get update
+      - run: sudo apt-get install sudo
+      - run: sudo apt-get install -y ca-certificates curl zip
+      
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+           cd "$GITHUB_WORKSPACE/Deployment-Scripts/"
+           python -m pip install --upgrade pip
+           pip install -r requirements.txt
+
+      - name: Process issue template inputs
+        run: |
+          echo 'github.event_name: ${{ github.event_name }}'
+          echo 'github.head_ref: ${{ github.head_ref }}'
+          echo 'github.event.issue.title: ${{ github.event.issue.title }}'
+          echo 'github.event.issue.number: ${{ github.event.issue.number }}'
+          echo 'github.event.issue.body: ${{ github.event.issue.body }}'
+          echo 'github.event.issue.repository_url: ${{ github.event.issue.repository_url }}'
+          echo 'github.event.repository.full_name: ${{ github.event.repository.full_name }}'
+          echo 'github.event.repository.url: ${{ github.event.repository.url }}'          
+         
+          cd "$GITHUB_WORKSPACE/Deployment-Scripts/"
+          echo "Executing python script: db_provisioning.py ... " 
+          
+          python $GITHUB_WORKSPACE/Deployment-Scripts/db_provisioning.py -v

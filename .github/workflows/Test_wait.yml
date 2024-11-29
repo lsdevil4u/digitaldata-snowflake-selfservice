@@ -1,0 +1,42 @@
+name: wait_test
+# Controls when the action will run
+
+on:
+  
+  workflow_dispatch:
+  
+jobs:
+  job1:
+    ##runs-on: [self-hosted, atmos-aws-shared-gh-runner]
+    runs-on: [atmos-aws-arc-runner-set]
+    steps:
+      - uses: Sanofi-InnerSource/github-actions-library/setup-root-ca@main
+      - run: sudo apt-get update
+      - run: sudo apt-get install sudo
+      - run: sudo apt-get install -y ca-certificates curl zip
+      
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run job1
+        run: |
+           echo "Job1 running"
+  job2:
+    needs: job1
+    environment:
+      name: wait
+    ##runs-on: [self-hosted, atmos-aws-shared-gh-runner]
+    runs-on: [atmos-aws-arc-runner-set]
+    steps:
+      - uses: Sanofi-InnerSource/github-actions-library/setup-root-ca@main
+      - run: sudo apt-get update
+      - run: sudo apt-get install sudo
+      - run: sudo apt-get install -y ca-certificates curl zip
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run job2
+        run: |
+           echo "Job2 running"
+      
